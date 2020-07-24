@@ -269,13 +269,23 @@ for e in gs.Edge_List:
 
 
 print("Node list:")
-print(spherical_points)
+for i in spherical_points:
+    print(i)
 
 #Warning: only use this set of nodes if you intend to produce an icosahedral geodesic dome
 #print("Node List")
 #print(unsorted_points)
 
 print("Edge List:")
-print(edge_number_list)
+for i in edge_number_list:
+    print(i)
+if CF.Icosohedral == False:
+    with open('Nodes.txt', 'w') as fp:
+        fp.write('\n'.join('{} {} {}'.format(x[0],x[1],x[2]) for x in spherical_points))
+else:
+    with open('Nodes.txt', 'w') as fp:
+        fp.write('\n'.join('{} {} {}'.format(x[0],x[1],x[2]) for x in unsorted_points))
 
+with open('Edges.txt', 'w') as fp:
+    fp.write('\n'.join('{} {}'.format(x[0],x[1]) for x in edge_number_list))
 
