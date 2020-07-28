@@ -199,5 +199,15 @@ class Coordinates(object):
         for e in self.Edge_List:
             print (e.Get_Edge_Coordinates())
 
+    def get_points(self):
+        points = []
+        for e in self.Edge_List:
+            points.append(e.x1.point_number)
+            points.append(e.x2.point_number)
+        non_duplicates = []
+        [non_duplicates.append(x) for x in points if x not in non_duplicates]
+
+        return non_duplicates
+
     def __cmp__(self, other):
         return cmp(self.point_number, other.point_number)

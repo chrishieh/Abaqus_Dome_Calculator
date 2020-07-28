@@ -15,7 +15,19 @@ import Coordinates as C
 import IcoFace as F
 import GeoSphere as G
 import config as CF
-import cs
+try:
+    import pip
+except ImportError:
+    raise Exception("Pip is not installed on you computer. Please see instruction 3 on the readme.")
+import subprocess
+import sys
+
+try:
+    import cs
+except ImportError:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", 'cs'])
+    import cs
+
 #from abaqusConstants import *
 
 dPi = D.Decimal(str(math.pi))
@@ -268,17 +280,39 @@ for e in gs.Edge_List:
 #         edge_number_list.remove(i)
 
 
-print("Node list:")
-for i in spherical_points:
-    print(i)
+points_hash = gs.Point_Hash
+edge_list = gs.Updated_Edge_List
+triangle_list = []
+hub_dict = {}
+non_duplicates = []
+for i in points_hash:
+    #print(i)
+    hub_dict[i.point_number] = i.get_points()
+
+
+for a in range(1, len(hub_dict)):
+    for b in range(1, len(hub_dict)):
+        for c in range(1, len(hub_dict)):
+            if b in hub_dict[a] and c in hub_dict[a] and b in hub_dict[c]:
+                triangle_list.append(sorted([a, b, c]))
+                #print("added")
+
+
+[non_duplicates.append(x) for x in triangle_list if x not in non_duplicates and x[0] is not x[1] and x[1] is not x[2] and x[0] is not x[2]]
+
+
+
+# print("Node list:")
+# for i in spherical_points:
+#     print(i)
 
 #Warning: only use this set of nodes if you intend to produce an icosahedral geodesic dome
 #print("Node List")
 #print(unsorted_points)
 
-print("Edge List:")
-for i in edge_number_list:
-    print(i)
+# print("Edge List:")
+# for i in edge_number_list:
+#     #print(i)
 if CF.Icosohedral == False:
     with open('Nodes.txt', 'w') as fp:
         fp.write('\n'.join('{} {} {}'.format(x[0],x[1],x[2]) for x in spherical_points))
@@ -288,4 +322,7 @@ else:
 
 with open('Edges.txt', 'w') as fp:
     fp.write('\n'.join('{} {}'.format(x[0],x[1]) for x in edge_number_list))
+with open('Triangles.txt', 'w') as fp:
+    fp.write('\n'.join('{} {}'.format(x[0],x[1],x[2]) for x in non_duplicates))
 
+print("Files updated successfully")
