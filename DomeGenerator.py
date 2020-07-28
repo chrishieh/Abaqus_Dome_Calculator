@@ -28,7 +28,11 @@ except ImportError:
     subprocess.check_call([sys.executable, "-m", "pip", "install", 'cs'])
     import cs
 
-#from abaqusConstants import *
+try:
+    import numpy as np
+except ImportError:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", 'numpy'])
+    import numpy as npit
 
 dPi = D.Decimal(str(math.pi))
 
@@ -313,6 +317,7 @@ for a in range(1, len(hub_dict)):
 # print("Edge List:")
 # for i in edge_number_list:
 #     #print(i)
+
 if CF.Icosohedral == False:
     with open('Nodes.txt', 'w') as fp:
         fp.write('\n'.join('{} {} {}'.format(x[0],x[1],x[2]) for x in spherical_points))
