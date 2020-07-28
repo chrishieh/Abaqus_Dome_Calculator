@@ -32,7 +32,7 @@ try:
     import numpy as np
 except ImportError:
     subprocess.check_call([sys.executable, "-m", "pip", "install", 'numpy'])
-    import numpy as npit
+    import numpy as np
 
 dPi = D.Decimal(str(math.pi))
 
