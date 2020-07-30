@@ -336,7 +336,7 @@ total_beam = 0
 for i in edge_number_list:
     node_number1 = i[0]
     node_number2 = i[1]
-    print(node_number2)
+    #print(node_number2)
     node_coordinate1 = spherical_points[node_number1 - 1]
     node_coordinate2 = spherical_points[node_number2 - 1]
     bar_length = (((node_coordinate1[0] - node_coordinate2[0]) ** 2) + ((node_coordinate1[1] - node_coordinate2[1]) ** 2) + ((node_coordinate1[2] - node_coordinate2[2]) ** 2)) ** .5
