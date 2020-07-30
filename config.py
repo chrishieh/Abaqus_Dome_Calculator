@@ -5,8 +5,8 @@ from decimal import Decimal
 #------------------------------------------------------------------
 # User defined variables
 
-R_mm = 4         # Radius of the circle in meters
-frequency_n = 2     # Frequency of the geodesic
+R_mm = 6 # Radius of the circle in meters
+frequency_n = 6     # Frequency of the geodesic
 Dome_calc = True    # Calculate for sphere (=False) or dome (=True)
 Icosohedral = False #Set to false to generate spherical dome or true for icosohedral dome
 #------------------------------------------------------------------
