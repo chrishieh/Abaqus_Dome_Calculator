@@ -15,6 +15,7 @@ import Coordinates as C
 import IcoFace as F
 import GeoSphere as G
 import config as CF
+import statistics
 try:
     import pip
 except ImportError:
@@ -237,7 +238,6 @@ gs.Hub_List_From_Edges()
 #     print(p.Get_Cartesian_Coordinates())
 
 unsorted_points = []
-
 for p in (gs.Point_Hash.keys()):
     points_string = p.Get_Cartesian_Coordinates()
     points_tuple = points_string[points_string.find('(') + 1 : points_string.find(')')]
@@ -254,20 +254,55 @@ for p in (gs.Point_Hash.keys()):
 
 
 
-spherical_points = []
+sorted_points = []
 quadrant = 0
-for i in unsorted_points:
-    x = i[0]
-    y = i[1]
-    z = i[2]
+cylindrical_radius = ((CF.R_mm ** 2) - ((CF.R_mm *CF.Cut_Point) ** 2)) **.5
+if not CF.Cylindrical and not CF.Icosohedral:
+    for i in unsorted_points:
+        x = i[0]
+        y = i[1]
+        z = i[2]
 
-    r, theta, phi = cs.cart2sp(x = x, y = y, z = z)
-    r = CF.R_mm
+        r, theta, phi = cs.cart2sp(x = x, y = y, z = z)
+        r = CF.R_mm
 
-    x, y, z = cs.sp2cart(r = r, theta = theta, phi = phi)
-    spherical = ((float(x), float(y), float(z)))
-    spherical_points.append(spherical)
+        x, y, z = cs.sp2cart(r = r, theta = theta, phi = phi)
+        point = ((float(x), float(y), float(z)))
+        sorted_points.append(point)
+elif CF.Cylindrical and CF.Icosohedral:
+    for i in unsorted_points:
+        x = i[0]
+        y = i[1]
+        z = i[2]
 
+        r, phi, z = cs.cart2cyl(x=x, y=y, z=z)
+
+        if z < (CF.R_mm * CF.Cut_Point):
+            r = cylindrical_radius
+
+        x, y, z = cs.cyl2cart(r = r, phi = phi, z = z)
+        point = ((float(x), float(y), float(z)))
+        sorted_points.append(point)
+
+elif CF.Cylindrical and not CF.Icosohedral:
+    for i in unsorted_points:
+
+        x = i[0]
+        y = i[1]
+        z = i[2]
+
+        if z < (CF.R_mm * CF.Cut_Point):
+            r, phi, z = cs.cart2cyl(x=x, y=y, z=z)
+            r = cylindrical_radius
+            x, y, z = cs.cyl2cart(r=r, phi=phi, z=z)
+
+        else:
+            r, theta, phi = cs.cart2sp(x=x, y=y, z=z)
+            r = CF.R_mm
+            x, y, z = cs.sp2cart(r=r, theta=theta, phi=phi)
+
+        point = ((float(x), float(y), float(z)))
+        sorted_points.append(point)
 
 edge_number_list = []
 
@@ -320,10 +355,10 @@ for a in range(1, len(hub_dict)):
 
 if CF.Icosohedral == False:
     with open('Nodes.txt', 'w') as fp:
-        fp.write('\n'.join('{} {} {}'.format(x[0],x[1],x[2]) for x in spherical_points))
+        fp.write('\n'.join('{} {} {}'.format(x[0],x[1],x[2]) for x in sorted_points))
 else:
     with open('Nodes.txt', 'w') as fp:
-        fp.write('\n'.join('{} {} {}'.format(x[0],x[1],x[2]) for x in unsorted_points))
+        fp.write('\n'.join('{} {} {}'.format(x[0],x[1],x[2]) for x in sorted_points))
 
 with open('Edges.txt', 'w') as fp:
     fp.write('\n'.join('{} {}'.format(x[0],x[1]) for x in edge_number_list))
@@ -333,15 +368,21 @@ with open('Triangles.txt', 'w') as fp:
 print("Files updated successfully")
 
 total_beam = 0
+bar_length_list = []
 for i in edge_number_list:
     node_number1 = i[0]
     node_number2 = i[1]
     #print(node_number2)
-    node_coordinate1 = spherical_points[node_number1 - 1]
-    node_coordinate2 = spherical_points[node_number2 - 1]
+    node_coordinate1 = sorted_points[node_number1 - 1]
+    node_coordinate2 = sorted_points[node_number2 - 1]
     bar_length = (((node_coordinate1[0] - node_coordinate2[0]) ** 2) + ((node_coordinate1[1] - node_coordinate2[1]) ** 2) + ((node_coordinate1[2] - node_coordinate2[2]) ** 2)) ** .5
     total_beam += bar_length
+    bar_length_list.append(bar_length)
+
+std_dev = statistics.pstdev(bar_length_list)
 
 print("Total bar length: " + str(total_beam) + " meters")
 print("Member Count: " + str(len(edge_number_list) + 1))
 print("Average Member Length: " + str(total_beam / (len(edge_number_list) + 1)))
+print("Bar Length Standard Deviation: " + str(std_dev))
+print("Percent Deviation: " + str(round(100 * std_dev / (total_beam / (len(edge_number_list) + 1)), 2)), '%')
