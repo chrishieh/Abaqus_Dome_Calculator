@@ -236,25 +236,38 @@ gs.Hub_List_From_Edges()
 #print(type(gs.Point_Hash))
 # for p in (gs.Point_Hash.keys()):
 #     print(p.Get_Cartesian_Coordinates())
+sorted_points = []
 
 unsorted_points = []
-for p in (gs.Point_Hash.keys()):
-    points_string = p.Get_Cartesian_Coordinates()
-    points_tuple = points_string[points_string.find('(') + 1 : points_string.find(')')]
-    points_tuple = points_tuple.split(',')
-    new_tuple = []
-    for i in points_tuple:
-        if 'E' in i:
-            new_tuple.append(float("{:.8f}".format(float(i))))
-        else:
-            new_tuple.append(float(i))
-    new_tuple = tuple(new_tuple)
-    unsorted_points.append(new_tuple)
 
+if CF.Icosohedral:
+    for p in (gs.Point_Hash.keys()):
+        points_string = p.Get_Cartesian_Coordinates()
+        points_tuple = points_string[points_string.find('(') + 1 : points_string.find(')')]
+        points_tuple = points_tuple.split(',')
+        new_tuple = []
+        for i in points_tuple:
+            if 'E' in i:
+                new_tuple.append(float("{:.8f}".format(float(i))))
+            else:
+                new_tuple.append(float(i))
+        new_tuple = tuple(new_tuple)
+        unsorted_points.append(new_tuple)
 
+else:
+    for p in (gs.Point_Hash.keys()):
+        points_string = p.Get_Cartesian_Coordinates()
+        points_tuple = points_string[points_string.find('(') + 1: points_string.find(')')]
+        points_tuple = points_tuple.split(',')
+        new_tuple = []
+        for i in points_tuple:
+            if 'E' in i:
+                new_tuple.append(float("{:.8f}".format(float(i))))
+            else:
+                new_tuple.append(float(i))
+        new_tuple = tuple(new_tuple)
+        sorted_points.append(new_tuple)
 
-
-sorted_points = []
 quadrant = 0
 cylindrical_radius = ((CF.R_mm ** 2) - ((CF.R_mm *CF.Cut_Point) ** 2)) **.5
 if not CF.Cylindrical and not CF.Icosohedral:
@@ -380,7 +393,8 @@ for i in edge_number_list:
     bar_length_list.append(bar_length)
 
 std_dev = statistics.pstdev(bar_length_list)
-
+if CF.Cylindrical:
+    print("Floor Space Radius: " + str(cylindrical_radius))
 print("Total bar length: " + str(total_beam) + " meters")
 print("Member Count: " + str(len(edge_number_list) + 1))
 print("Average Member Length: " + str(total_beam / (len(edge_number_list) + 1)))
